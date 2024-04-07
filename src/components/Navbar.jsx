@@ -6,7 +6,7 @@ const Navbar = () => {
     return (
         <nav className='navbar'>
             <Flex direction='column' gap='mdd'>
-                <Link to='/profile'>Мой профиль</Link>
+                <Link to='/'>Мой профиль</Link>
                 <Link to='/lectures'>Лекции</Link>
                 <Link to='/tests'>Тесты</Link>
             </Flex>

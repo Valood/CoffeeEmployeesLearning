@@ -15,3 +15,7 @@ a{
 .page{
     padding: 16px 24px;
 }
+
+p{
+    margin: 0;
+}
