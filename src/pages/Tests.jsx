@@ -1,28 +1,47 @@
-import {Button, Center, Container, Flex, Title} from "@mantine/core";
+import {Button, Center, Radio, Container, Flex, Title, Loader, Modal} from "@mantine/core";
 import './Tests.scss'
-import {useState} from "react";
+import {useEffect, useMemo, useState} from "react";
+import {useGetTestQuery, useSendTestMutation} from "../store/api.js";
+import {notifications} from "@mantine/notifications";
+import {useNavigate} from "react-router-dom";
 
 const Tests = () => {
-    const [activeQuestion, setActiveQuestion] = useState(1);
-    const [testState, setTestState] = useState([
-        {number: 1, answer: null},
-        {number: 2, answer: null},
-        {number: 3, answer: null},
-        {number: 4, answer: null},
-        {number: 5, answer: null},
-    ])
+    const {data: test, isLoading} = useGetTestQuery()
+    const [sendTest, {data: testResult}] = useSendTestMutation()
+    const navigate = useNavigate()
 
-    const setAnswer = () => {
-        setTestState(prevState => {
-            const copy = [...prevState]
-            const question = prevState.find(question => question.number === activeQuestion)
-            if(question){
-                question.answer = 1
+    const [activeQuestionId, setActiveQuestionId] = useState(1);
+    const [testState, setTestState] = useState([])
+    const [currentAnswerChecked, setCurrentAnswerChecked] = useState(null)
+
+    const activeQuestion = useMemo(() => {
+        if(test) return test.questions.find(question => question.id === activeQuestionId);
+        return null
+    }, [test, activeQuestionId])
+
+    useEffect(() => {
+        if(testState.length === test?.questions?.length){
+            sendTest({answers: testState})
+        }
+    }, [testState, test])
+
+    useEffect(() => {
+        if(testResult){
+            setTestState([])
+            setActiveQuestionId(1)
+            notifications.show({
+                title: testResult.passed ? 'Успешно' : 'Провалено',
+                message: testResult.passed ? `Ваша новая должность "${testResult.new_role}"` : 'Тест не пройден. Попробуйте ещё раз!'
+            })
+            if(testResult.passed){
+                navigate('/')
             }
-            return copy
-        })
-    }
+        }
+    }, [testResult])
 
+    if(isLoading){
+        return <Loader size='xl' mt='xl' ml='xl'/>
+    }
     return (
         <Container fluid className='tests page'>
             <Title align='center' order={1}>Тесты</Title>
@@ -31,29 +50,38 @@ const Tests = () => {
                 p='md'
                 mt='md'
                 className='tests-numbers'
+                wrap='wrap'
             >
-                {testState.map(({number}) => <div
+                {test.questions.map(({id}) => <div
                     className={[
                         'tests-number',
-                        activeQuestion === number ? 'active' : ''
+                        activeQuestionId === id ? 'active' : ''
                     ].join(' ')}
-                    onClick={() => setActiveQuestion(number)}
-                    key={number}
+                    onClick={() => setActiveQuestionId(id)}
+                    key={id}
                 >
-                    {number}
+                    {id}
                 </div>)}
             </Flex>
-            <Title mt='md' align='center' order={3}>{activeQuestion}</Title>
+            <Title mt='md' align='center' order={3}>{activeQuestion.question}</Title>
+            {activeQuestion?.variants && <Flex direction='column' gap='sm'>
+                    {activeQuestion.variants.map((variant) => <Radio
+                        key={variant.id}
+                        label={variant.answer}
+                        checked={variant.id === currentAnswerChecked}
+                        onChange={() => setCurrentAnswerChecked(variant.id)}
+                    />)}
+                </Flex>}
             <Center>
-                {activeQuestion < 5 ?
+                {activeQuestionId < test.questions.length ?
                     <Button size='md' mt='xl' onClick={() => {
-                        setAnswer()
-                        setActiveQuestion(prevState => prevState + 1)
+                        setTestState(prevState => [...prevState, currentAnswerChecked])
+                        setActiveQuestionId(prevState => prevState + 1)
                     }}>
                         Ответить
                     </Button> :
                     <Button size='md' mt='xl' onClick={() => {
-                        setAnswer()
+                        setTestState(prevState => [...prevState, currentAnswerChecked])
                     }}>Завершить</Button>
                 }
             </Center>

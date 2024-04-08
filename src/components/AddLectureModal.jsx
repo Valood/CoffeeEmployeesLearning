@@ -1,7 +1,10 @@
 import {Button, Flex, Modal, Textarea, TextInput} from "@mantine/core";
 import {isNotEmpty, useForm} from "@mantine/form";
+import {useAddLectureMutation} from "../store/api.js";
+import {useEffect} from "react";
 
 const AddLectureModal = ({opened, onClose}) => {
+    const [addLecture, isSuccess] = useAddLectureMutation()
     const form = useForm({
         initialValues: {
             title: '',
@@ -14,10 +17,15 @@ const AddLectureModal = ({opened, onClose}) => {
     })
 
     const handleSubmit = (value) => {
-        console.log(value)
-        onClose()
-        form.reset()
+        addLecture(value)
     }
+
+    useEffect(() => {
+        if(isSuccess){
+            onClose()
+            form.reset()
+        }
+    }, [isSuccess]);
 
     return (
         <Modal opened={opened} onClose={onClose} size='xl' title='Добавить лекцию'>

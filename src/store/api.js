@@ -2,7 +2,7 @@ import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: '',
+        baseUrl: 'http://localhost:8000/api',
         prepareHeaders: (headers) => {
             const token =  localStorage.getItem('token');
             if(token){
@@ -10,19 +10,19 @@ export const api = createApi({
             }
         },
     }),
-    tagTypes: ['PROFILE', 'LECTURE'],
+    tagTypes: ['PROFILE', 'LECTURE', 'TEST'],
     endpoints: build => ({
         registration: build.mutation({
             query: body => ({
                 body,
-                url: '/registration',
+                url: '/auth/register',
                 method: 'POST'
             })
         }),
         login: build.mutation({
             query: body => ({
                 body,
-                url: '/login',
+                url: '/auth/login',
                 method: 'POST'
             })
         }),
@@ -31,7 +31,7 @@ export const api = createApi({
             providesTags: ['LECTURE']
         }),
         getLectureContent: build.query({
-            query: id => `/lecture/${id}`
+            query: id => `/lectures/${id}`
         }),
         getUserInfo: build.query({
             query: () => `/user`,
@@ -54,20 +54,36 @@ export const api = createApi({
         addLecture: build.mutation({
             query: body => ({
                 body,
-                url: '/lecture',
+                url: '/lectures',
                 method: 'POST'
             }),
             invalidatesTags: ['LECTURE']
         }),
         getTest: build.query({
-            query: () => `/test`
+            query: () => `/test`,
+            providesTags: ['TEST']
         }),
         sendTest: build.mutation({
             query: body => ({
                 body,
-                url: '/test',
-                method: 'POST'
-            })
+                url: '/test/check',
+                method: 'POST',
+            }),
+            invalidatesTags: ['TEST', 'PROFILE']
         }),
     })
 })
+
+export const {
+    useRegistrationMutation,
+    useLoginMutation,
+    useGetLecturesQuery,
+    useGetLectureContentQuery,
+    useGetUserInfoQuery,
+    useChangeProfileMutation,
+    useGetUserStatisticsQuery,
+    useGetOtherStatisticsQuery,
+    useAddLectureMutation,
+    useGetTestQuery,
+    useSendTestMutation
+} = api

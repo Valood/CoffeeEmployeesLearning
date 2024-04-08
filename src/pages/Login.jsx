@@ -1,8 +1,11 @@
 import {Button, Center, Container, Flex, Input, Title} from "@mantine/core";
 import {useForm} from "@mantine/form";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useLoginMutation} from "../store/api.js";
+import {useEffect} from "react";
 
 const Login = () => {
+    const [login, {data}] = useLoginMutation()
     const form = useForm({
         initialValues: {
             email: '',
@@ -12,9 +15,18 @@ const Login = () => {
     const navigate = useNavigate()
 
     const handleSubmit = (value) => {
-        console.log(value)
-        navigate('/')
+        login(value)
     }
+
+    useEffect(() => {
+        if(data){
+            localStorage.setItem('token', data.token)
+            navigate('/')
+        }
+        else if(localStorage.getItem('token')){
+            navigate('/')
+        }
+    }, [data]);
 
     return (
         <Container fluid className='page'>
@@ -25,9 +37,10 @@ const Login = () => {
                         <Input placeholder='E-mail' {...form.getInputProps('email')}/>
                         <Input placeholder='Пароль' type='password' {...form.getInputProps('password')}/>
                     </Flex>
-                    <Center>
-                        <Button type='submit' size='md' mt='lg'>Войти</Button>
-                    </Center>
+                    <Flex direction='column' align='center' gap='sm' mt='md'>
+                        <Link to='/registration'>Нет аккаунта? Зарегистрироваться.</Link>
+                        <Button type='submit' size='md'>Войти</Button>
+                    </Flex>
                 </form>
             </Container>
         </Container>

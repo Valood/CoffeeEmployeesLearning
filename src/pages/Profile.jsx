@@ -3,6 +3,7 @@ import ProfileTab from "../components/ProfileTab.jsx";
 import StatisticsTab from "../components/StatisticsTab.jsx";
 
 const Profile = () => {
+
     return (
         <Container fluid className='page'>
             <Title align='center' order={1}>Мой профиль</Title>

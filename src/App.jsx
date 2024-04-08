@@ -10,18 +10,18 @@ import Lecture from "./pages/Lecture.jsx";
 
 function App() {
 
-  return (
-    <Routes>
-      <Route path="/" element={<Home/>}>
-          <Route path='/' element={<Profile/>}/>
-          <Route path='lectures' element={<Lectures/>}/>
-          <Route path='lectures/:id' element={<Lecture/>}/>
-          <Route path='tests' element={<Tests/>}/>
-          <Route path='registration' element={<Registration/>}/>
-          <Route path='login' element={<Login/>}/>
-      </Route>
-    </Routes>
-  )
+    return (
+        <Routes>
+            <Route path='/registration' element={<Registration/>}/>
+            <Route path='/login' element={<Login/>}/>
+            <Route path="/" element={<Home/>}>
+                <Route path='/' element={<Profile/>}/>
+                <Route path='lectures' element={<Lectures/>}/>
+                <Route path='lectures/:id' element={<Lecture/>}/>
+                <Route path='tests' element={<Tests/>}/>
+            </Route>
+        </Routes>
+    )
 }
 
 export default App

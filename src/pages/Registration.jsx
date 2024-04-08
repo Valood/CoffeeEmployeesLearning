@@ -1,8 +1,12 @@
 import {hasLength, isEmail, isNotEmpty, useForm} from "@mantine/form";
 import {Button, Center, Container, Flex, Input, Title} from "@mantine/core";
 import {useNavigate} from "react-router-dom";
+import {useRegistrationMutation} from "../store/api.js";
+import {useEffect} from "react";
+import {notifications} from "@mantine/notifications";
 
 const Registration = () => {
+    const [registration, {isSuccess}] = useRegistrationMutation()
     const form = useForm({
         initialValues: {
             name: '',
@@ -20,9 +24,18 @@ const Registration = () => {
     const navigate = useNavigate()
 
     const handleSubmit = (value) => {
-        console.log(value)
-        navigate('/login')
+        registration(value)
     }
+
+    useEffect(() => {
+        if(isSuccess){
+            notifications.show({
+                title: 'Успешно',
+                message: 'Аккаунт зарегистрирован!'
+            })
+            navigate('/login')
+        }
+    }, [isSuccess])
 
     return (
         <Container fluid className='page'>

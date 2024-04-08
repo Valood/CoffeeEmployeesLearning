@@ -1,11 +1,17 @@
 import {useState} from 'react';
-import {Button, Container, Flex, TextInput} from "@mantine/core";
+import {Button, Container, Flex, Loader, TextInput} from "@mantine/core";
 import {hasLength, isEmail, isNotEmpty, useForm} from "@mantine/form";
 import './ProfileTab.scss'
+import {api, useGetUserInfoQuery} from "../store/api.js";
+import {useNavigate} from "react-router-dom";
+import {useDispatch} from "react-redux";
 
 const ProfileTab = () => {
-    const [isEdit, setIsEdit] = useState(false)
+    const {data: user, isLoading} = useGetUserInfoQuery()
 
+    const [isEdit, setIsEdit] = useState(false)
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const form = useForm({
         initialValues: {
             name: '',
@@ -26,19 +32,33 @@ const ProfileTab = () => {
         setIsEdit(false)
     }
 
+    const logout = () => {
+        localStorage.removeItem('token')
+        dispatch(api.util.resetApiState())
+        navigate('/login')
+    }
+
+    if(isLoading){
+        return <Loader size='xl' ml='xl' mt='xl'/>
+    }
     return (
         <Container size='sm' mt='md'>
             {!isEdit ?
                 <Flex direction='column' gap='xs'>
-                    <TextInput disabled label='Имя'/>
-                    <TextInput disabled label='Город'/>
-                    <TextInput disabled label='E-mail'/>
-                    <Button
-                        size='md'
-                        mt='md'
-                        onClick={() => setIsEdit(true)}
-                        style={{alignSelf: 'center', width: '40%'}}
-                    >Редактировать</Button>
+                    <TextInput value={user.name} disabled label='Имя'/>
+                    <TextInput value={user.city} disabled label='Город'/>
+                    <TextInput value={user.email} disabled label='E-mail'/>
+                    <TextInput value={user.role} disabled label='Должность'/>
+                    <Flex justify='center' gap='md'>
+                        <Button
+                            size='md'
+                            mt='md'
+                            color='red'
+                            style={{alignSelf: 'center', width: '40%'}}
+                            onClick={() => logout()}
+                        >Выйти</Button>
+                    </Flex>
+
                 </Flex> :
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <Flex direction='column' gap='xs'>
